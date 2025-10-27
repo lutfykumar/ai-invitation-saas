@@ -1,117 +1,93 @@
-# Project Requirements Document: codeguide-starter
-
----
+# Project Requirements Document (PRD)
 
 ## 1. Project Overview
 
-The **codeguide-starter** project is a boilerplate web application that provides a ready-made foundation for any web project requiring secure user authentication and a post-login dashboard. It sets up the common building blocks—sign-up and sign-in pages, API routes to handle registration and login, and a simple dashboard interface driven by static data. By delivering this skeleton, it accelerates development time and ensures best practices are in place from day one.
+We’re building an AI-powered digital invitation SaaS platform that lets users create, customize, and share event invitations (weddings, birthdays, meetings, etc.) using modern web technologies and AI-generated content. At its core, the app provides secure user accounts, a guided invitation creation workflow, customizable design themes, and an AI assistant to help craft the invitation text.
 
-This starter kit is being built to solve the friction developers face when setting up repeated common tasks: credential handling, session management, page routing, and theming. Key objectives include: 1) delivering a fully working authentication flow (registration & login), 2) providing a gated dashboard area upon successful login, 3) establishing a clear, maintainable project structure using Next.js and TypeScript, and 4) demonstrating a clean theming approach with global and section-specific CSS. Success is measured by having an end-to-end login journey in under 200 lines of code and zero runtime type errors.
+This product aims to make invitation design fast and fun by combining a rich library of visual themes with a text-generating AI. Users sign up, pick an event category and style, then either write their own details or ask the AI to suggest wording. Once done, they preview and publish a shareable link that anyone can open without logging in.
 
----
+**Key objectives / success criteria:**
+- Enable new users to sign up and create a basic invitation within 5 minutes.
+- Provide at least 5 distinct invitation themes at launch.
+- Deliver AI-generated text suggestions in under 3 seconds.
+- Ensure public invitation pages load in under 1 second (Server-Side Rendered).
+- Maintain 99.9% uptime for the core invitation creation and viewing flows.
 
 ## 2. In-Scope vs. Out-of-Scope
 
 ### In-Scope (Version 1)
-- User registration (sign-up) form with validation
-- User login (sign-in) form with validation
-- Next.js API routes under `/api/auth/route.ts` handling:
-  - Credential validation
-  - Password hashing (e.g., bcrypt)
-  - Session creation or JWT issuance
-- Protected dashboard pages under `/dashboard`:
-  - `layout.tsx` wrapping dashboard content
-  - `page.tsx` rendering static data from `data.json`
-- Global application layout in `/app/layout.tsx`
-- Basic styling via `globals.css` and `dashboard/theme.css`
-- TypeScript strict mode enabled
+- Email/password user authentication and account management.
+- Dashboard for listing, creating, editing, and deleting invitations.
+- Workflow for selecting event category (e.g., wedding, birthday, meeting).
+- Theme selection from a library of at least 5 predefined designs.
+- Form-based editor with fields for event title, date/time, location, and custom message.
+- AI Assistant panel that generates or refines invitation text via Vercel AI SDK.
+- Live preview of invitations as users make changes.
+- Public shareable invitation pages (no login required).
+- PostgreSQL database with Drizzle ORM models for users, invitations, themes, and categories.
+- Basic Docker setup for local development consistency.
 
-### Out-of-Scope (Later Phases)
-- Integration with a real database (PostgreSQL, MongoDB, etc.)
-- Advanced authentication flows (password reset, email verification, MFA)
-- Role-based access control (RBAC)
-- Multi-tenant or white-label theming
-- Unit, integration, or end-to-end testing suites
-- CI/CD pipeline and production deployment scripts
-
----
+### Out-of-Scope (Future Phases)
+- Payment integration or subscription management.
+- Multi-language or localization support.
+- Role-based admin panel for managing themes and categories (planned later).
+- Analytics dashboard (e.g., view counts, click tracking).
+- Mobile-native apps (iOS / Android).
+- Social media integrations (e.g., Facebook events sync).
 
 ## 3. User Flow
 
-A new visitor lands on the root URL and sees a welcome page with options to **Sign Up** or **Sign In**. If they choose Sign Up, they fill in their email, password, and hit “Create Account.” The form submits to `/api/auth/route.ts`, which hashes the password, creates a new user session or token, and redirects them to the dashboard. If any input is invalid, an inline error message explains the issue (e.g., “Password too short”).
+When a new user lands on the site, they see a home page with a “Sign Up” button. Clicking that opens a registration form (email and password). Once they confirm their email, they land in their dashboard—a central hub with a sidebar. The sidebar has links to “My Invitations,” “Create New,” and “Account Settings.” In “My Invitations,” they see a table listing saved invites (title, date, status) and can click an existing invite to edit or delete it.
 
-Once authenticated, the user is taken to the `/dashboard` route. Here they see a sidebar or header defined by `dashboard/layout.tsx`, and the main panel pulls in static data from `data.json`. They can log out (if that control is present), but otherwise their entire session is managed by server-side cookies or tokens. Returning users go directly to Sign In, submit credentials, and upon success they land back on `/dashboard`. Any unauthorized access to `/dashboard` redirects back to Sign In.
-
----
+To create a new invitation, the user clicks “Create New,” which steps them through selecting an event category, choosing a design theme from a gallery of cards, and then opening the invitation editor. Here they fill in event details via form fields and can open the AI Assistant panel to generate or tweak the invite text. As they type or use AI suggestions, a live preview updates on the right. When ready, they click “Publish,” which saves the invitation and provides a shareable URL. Guests visit that URL to see the fully styled, server-rendered invitation page without needing to log in.
 
 ## 4. Core Features
 
-- **Sign-Up Page (`/app/sign-up/page.tsx`)**: Form fields for email & password, client-side validation, POST to `/api/auth`.
-- **Sign-In Page (`/app/sign-in/page.tsx`)**: Form fields for email & password, client-side validation, POST to `/api/auth`.
-- **Authentication API (`/app/api/auth/route.ts`)**: Handles both registration and login based on HTTP method, integrates password hashing (bcrypt) and session or JWT logic.
-- **Global Layout (`/app/layout.tsx` + `globals.css`)**: Shared header, footer, and CSS resets across all pages.
-- **Dashboard Layout (`/app/dashboard/layout.tsx` + `dashboard/theme.css`)**: Sidebar or top nav for authenticated flows, section-specific styling.
-- **Dashboard Page (`/app/dashboard/page.tsx`)**: Reads `data.json`, renders it as cards or tables.
-- **Static Data Source (`/app/dashboard/data.json`)**: Example dataset to demo dynamic rendering.
-- **TypeScript Configuration**: `tsconfig.json` with strict mode and path aliases (if any).
-
----
+- **Authentication & Authorization**: Secure sign-up, login, password reset, and protected dashboard routes via Better Auth.
+- **Dashboard & Navigation**: Sidebar and main content area listing user invitations and offering “Create,” “Edit,” and “Delete” actions.
+- **Invitation Creation Wizard**: Multi-step form for picking category, theme, and entering event details.
+- **AI Content Assistant**: Embedded panel using `@ai-sdk/react` and `assistant-ui` to generate or refine invitation text.
+- **Theme Selector**: Visual gallery of invitation templates powered by a theme database.
+- **Live Preview**: Real-time rendering of invitation as user edits fields or applies AI suggestions.
+- **Public Invite Page**: Dynamic Next.js route (`/invites/[inviteId]`) that server-side renders the invitation with the selected theme.
+- **Data Models & API**: Drizzle ORM schemas and Next.js API routes for CRUD operations on users, invitations, themes, categories.
+- **Containerization**: Docker configuration to spin up Postgres and the Next.js app locally.
 
 ## 5. Tech Stack & Tools
 
-- **Framework**: Next.js (App Router) for file-based routing, SSR/SSG, and API routes.
-- **Language**: TypeScript for type safety.
-- **UI Library**: React 18 for component-based UI.
-- **Styling**: Plain CSS via `globals.css` (global reset) and `theme.css` (sectional styling). Can easily migrate to CSS Modules or Tailwind in the future.
-- **Backend**: Node.js runtime provided by Next.js API routes.
-- **Password Hashing**: bcrypt (npm package).
-- **Session/JWT**: NextAuth.js or custom JWT logic (to be decided in implementation).
-- **IDE & Dev Tools**: VS Code with ESLint, Prettier extensions. Optionally, Cursor.ai for AI-assisted coding.
-
----
+- **Frontend Framework**: Next.js 15 (App Router, Turbopack) with React and TypeScript.
+- **Styling**: Tailwind CSS v4 + CSS variables for theme colors.
+- **UI Components**: `shadcn/ui` for buttons, forms, cards, tables, and modals.
+- **Auth**: Better Auth for email/password sign-up and session management.
+- **Database & ORM**: PostgreSQL with Drizzle ORM (type-safe schemas).
+- **AI Integration**: Vercel AI SDK (`@ai-sdk/react`) and `assistant-ui` for streaming prompts and suggestions.
+- **Containerization**: Docker & Docker Compose for local dev environment (Next.js + Postgres).
+- **Development Tools**: VSCode, optionally Cursor or Windsurf extensions for code completion.
 
 ## 6. Non-Functional Requirements
 
-- **Performance**: Initial page load under 200 ms on a standard broadband connection. API responses under 300 ms.
-- **Security**:
-  - HTTPS only in production.
-  - Proper CORS, CSRF protection for API routes.
-  - Secure password storage (bcrypt with salt).
-  - No credentials or secrets checked into version control.
-- **Scalability**: Structure must support adding database integration, caching layers, and advanced auth flows without rewiring core app.
-- **Usability**: Forms should give real-time feedback on invalid input. Layout must be responsive (mobile > 320 px).
-- **Maintainability**: Code must adhere to TypeScript strict mode. Linting & formatting enforced by ESLint/Prettier.
-
----
+- **Performance**: Public invitation pages must SSR in <1s on a standard Vercel instance. AI suggestions should return in <3s.
+- **Security**: Protect API routes; sanitize all user inputs to prevent XSS/SQL injection; use HTTPS for all traffic; store passwords with salted hashing.
+- **Scalability**: Design database schemas and API layers to handle at least 10,000 invitations and 5,000 active users initially.
+- **Reliability**: Ensure 99.9% uptime; implement retry logic for AI API calls.
+- **Usability / Accessibility**: Follow WCAG 2.1 AA guidelines; all forms and controls must be keyboard-navigable and have proper ARIA labels.
 
 ## 7. Constraints & Assumptions
 
-- **No Database**: Dashboard uses only `data.json`; real database integration is deferred.
-- **Node Version**: Requires Node.js >= 14.
-- **Next.js Version**: Built on Next.js 13+ App Router.
-- **Authentication**: Assumes availability of bcrypt or NextAuth.js at implementation time.
-- **Hosting**: Targets serverless or Node.js-capable hosting (e.g., Vercel, Netlify).
-- **Browser Support**: Modern evergreen browsers; no IE11 support required.
-
----
+- The Vercel AI SDK and underlying AI model (e.g., GPT-4) will be available with reasonable latency and quota.
+- Users only require email/password auth (no social logins in v1).
+- Invitations are simple HTML/CSS pages—no file uploads (images or attachments) in this phase.
+- Hosting on Vercel (Next.js optimized), database hosted on a managed PostgreSQL service.
+- Assumes typical modern browser compatibility (Chrome, Firefox, Safari, Edge).
 
 ## 8. Known Issues & Potential Pitfalls
 
-- **Static Data Limitation**: `data.json` is only for demo. A real API or database will be needed to avoid stale data.
-  *Mitigation*: Define a clear interface for data fetching so swapping to a live endpoint is trivial.
-
-- **Global CSS Conflicts**: Using global styles can lead to unintended overrides.
-  *Mitigation*: Plan to migrate to CSS Modules or utility-first CSS in Phase 2.
-
-- **API Route Ambiguity**: Single `/api/auth/route.ts` handling both sign-up and sign-in could get complex.
-  *Mitigation*: Clearly branch on HTTP method (`POST /register` vs. `POST /login`) or split into separate files.
-
-- **Lack of Testing**: No test suite means regressions can slip in.
-  *Mitigation*: Build a minimal Jest + React Testing Library setup in an early iteration.
-
-- **Error Handling Gaps**: Client and server must handle edge cases (network failures, malformed input).
-  *Mitigation*: Define a standard error response schema and show user-friendly messages.
+- **API Rate Limits**: AI service quotas may throttle frequent content generation. Mitigation: implement debounce and caching of AI suggestions, and show clear rate-limit errors.
+- **Theme Consistency**: Complex CSS variable overrides can conflict. Mitigation: define a strict theming contract and validate theme assets at build time.
+- **Database Migrations**: Schema changes in Drizzle require careful rollout. Mitigation: use versioned migrations and test on staging before production.
+- **Security of Public Pages**: Risk of XSS if invitation text isn’t sanitized. Mitigation: run all user-generated text through a sanitizer and use React’s `dangerouslySetInnerHTML` sparingly.
+- **AI Quality Variability**: Generated text may not always match event tone. Mitigation: provide clear prompt templates and allow manual editing.
 
 ---
 
-This PRD should serve as the single source of truth for the AI model or any developer generating the next set of technical documents: Tech Stack Doc, Frontend Guidelines, Backend Structure, App Flow, File Structure, and IDE Rules. It contains all functional and non-functional requirements with no ambiguity, enabling seamless downstream development.
+This PRD outlines all the core requirements, flows, and constraints for building the AI-powered digital invitation SaaS. It should serve as the single source of truth for subsequent technical documents on tech stack, frontend & backend structure, UI guidelines, and deployment configurations.
