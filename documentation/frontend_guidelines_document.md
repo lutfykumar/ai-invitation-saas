@@ -1,180 +1,128 @@
-# Frontend Guideline Document
+# Frontend Guidelines for AI Invitation SaaS
 
-This document explains, in simple terms, how the frontend of the `codeguide-starter` project is structured, styled, and built. Anyone—technical or not—can read this and understand which tools are used, how components fit together, and what practices keep the app fast, reliable, and easy to maintain.
-
----
+This document outlines the frontend architecture, design principles, styling approach, component structure, state management, routing, performance optimizations, and testing strategies for the AI Invitation SaaS project. It is written in everyday language and covers all key technologies and patterns used.
 
 ## 1. Frontend Architecture
 
-**Core Frameworks and Libraries**
-- **Next.js (App Router)**: A React-based framework that provides file-based routing, server-side rendering (SSR), static site generation (SSG), and built-in API endpoints all in one project.
-- **React 18**: The library for building user interfaces using components and hooks.
-- **TypeScript**: A superset of JavaScript that adds static types, helping catch errors early and making the code easier to understand and refactor.
+### Overview
+- **Framework**: Next.js 15 (App Router) offers both server-side rendering (SSR) and client-side rendering (CSR) where needed. This helps with SEO for public invitation pages and interactivity in the dashboard.
+- **Language**: TypeScript ensures type safety across the UI, server functions, and database layer.
+- **Component Library**: `shadcn/ui` provides accessible, pre-built React components (buttons, forms, tables, layouts).
+- **Styling**: Tailwind CSS v4 powers utility-first styling, enabling rapid UI development and easy customization.
+- **AI Integration**: Vercel’s AI SDK (`@ai-sdk/react`, `assistant-ui`) plugs into React components to generate invitation text.
+- **Authentication**: Better Auth secures user sign-up, sign-in, and protects dashboard routes.
+- **Data Layer**: Drizzle ORM with PostgreSQL for type-safe database schemas and queries.
+- **DevOps**: Docker standardizes the development environment, simplifying setup and deployment.
 
-**How It’s Organized**
-- The `app/` folder holds all pages and layouts. Each URL path corresponds to a folder:
-  - `/app/sign-in` and `/app/sign-up` for authentication pages.
-  - `/app/dashboard` for the protected user area.
-  - API routes live under `/app/api/auth/route.ts`.
-- Each route folder contains:
-  - `page.tsx` (the UI for that page)
-  - `layout.tsx` (wrapping structure, like headers or sidebars)
-  - Styles (e.g., `theme.css` in the dashboard).
-
-**Why This Works**
-- **Scalability**: Adding new pages or features means creating new folders with their own layouts and pages. You don’t have to touch a central router file.
-- **Maintainability**: Code is separated by feature. Backend logic (API routes) lives alongside the frontend code for that feature, reducing context-switching.
-- **Performance**: Next.js pre-renders pages where possible and splits code by route, so users download only what’s needed.
-
----
+### Scalability, Maintainability, Performance
+- **Separation of Concerns**: UI, data fetching, and business logic live in clear folders (`/app`, `/components`, `/db`).
+- **Reusable Components**: Encourages building small, focused UI units that can be combined and updated independently.
+- **Type Safety**: Catch errors at compile time, reducing runtime bugs.
+- **Hybrid Rendering**: SSR for public invites, CSR for interactive dashboard, balancing performance and user experience.
+- **Containerization**: Docker ensures consistent environments across machines and during deployment.
 
 ## 2. Design Principles
 
-1. **Usability**: Forms give instant feedback. Buttons and links are clearly labeled.
-2. **Accessibility**: Semantic HTML, proper color contrast, and focus outlines ensure people using screen readers or keyboards can navigate easily.
-3. **Responsiveness**: Layouts adapt from mobile (320px) up to large desktop screens. CSS media queries ensure content resizes and stacks neatly.
-4. **Consistency**: Shared global layout and styling mean pages look and feel like part of the same app.
+### Key Principles
+1. **Usability**: Intuitive workflows—users sign in, pick a theme, enter details, and generate invitations with minimal friction.
+2. **Accessibility**: All interactive elements (buttons, forms, modals) comply with WCAG standards (keyboard navigation, ARIA labels).
+3. **Responsiveness**: Layout adapts smoothly from mobile devices to large desktops.
+4. **Consistency**: Uniform styling, spacing, and typography across all screens.
+5. **Performance**: Fast load times with code splitting, SSR, and optimized assets.
 
-**How We Apply Them**
-- Form fields use `aria-*` attributes and visible labels.
-- Error messages appear inline under inputs.
-- Navigation elements (header, sidebar) appear in every layout.
-- Breakpoints at 480px, 768px, and 1024px guide responsive adjustments.
-
----
+### Application in UI
+- Forms use clear labels and inline validation messages.
+- Color contrast meets accessibility ratios.
+- Navigation and buttons have consistent placement, size, and behavior.
+- Components adapt layout (stacked cards on mobile, side-by-side on desktop).
 
 ## 3. Styling and Theming
 
-**Approach**
-- **Global Styles (`globals.css`)**: Resets, base typography, and common utility classes.
-- **Section Styles (`theme.css` in dashboard)**: Styles specific to the dashboard area (colors, layouts).
-- We follow a **BEM-inspired naming** for classes when writing new CSS to avoid conflicts and keep selectors clear.
+### Styling Approach
+- **Utility-First**: Tailwind CSS v4 for quick, atomic styling.
+- **CSS Variables**: Define theme tokens (colors, fonts, shadows) in `:root` and switch via data attributes for light/dark and invitation themes.
+- **Methodology**: BEM-like naming in custom CSS modules when needed, but primarily Tailwind classes.
 
-**Visual Style**: Modern flat design with subtle shadows for depth. Clear spacing and large touch targets on mobile.
+### Theming
+- **Light & Dark Modes**: Controlled by a `<html data-theme="light|dark">` attribute. Colors swap via CSS variables.
+- **Invitation Themes**: Stored in the database (name, preview image, CSS variables). Users pick a theme, and the preview updates in real time.
+- **Glassmorphism Accents**: Invitation cards feature frosted backgrounds with subtle shadows and borders.
 
-**Color Palette**
-- **Primary Blue**: #1E90FF  (buttons, highlights)
-- **Secondary Navy**: #2C3E50  (header, sidebar background)
-- **Accent Cyan**: #00CEC9  (links, hover states)
-- **Neutral Light**: #F8F9FA  (page backgrounds)
-- **Neutral Dark**: #2D3436  (text, icons)
-
-**Font**
-- **Inter** (sans-serif): Clean, modern, highly legible on screens. Fallback to system fonts like `-apple-system, BlinkMacSystemFont, sans-serif`.
-
-**Theming**
-- To keep a consistent look, all colors and font sizes are defined in CSS variables in `globals.css`:
-  ```css
-  :root {
-    --color-primary: #1E90FF;
-    --color-secondary: #2C3E50;
-    --color-accent: #00CEC9;
-    --color-bg: #F8F9FA;
-    --color-text: #2D3436;
-    --font-family: 'Inter', sans-serif;
-  }
-  ```
-- Components consume these variables for backgrounds, borders, and text.
-
----
+### Visual Style
+- **Overall**: Modern flat design with glassmorphism touches in invitation previews.
+- **Color Palette**:
+  • Primary Blue: #4F46E5  
+  • Accent Teal: #14B8A6  
+  • Neutral Gray: #F3F4F6 (light), #1F2937 (dark)  
+  • Text Dark: #111827  
+  • Text Light: #F9FAFB
+- **Fonts**:
+  • Headings & Body: Inter, system-ui fallback  
+  • AI Assistant Text: Roboto Mono for code-like clarity
 
 ## 4. Component Structure
 
-**File Layout**
-- `/app` (top-level folder)
-  - `layout.tsx`: Global wrapper (nav, footer).
-  - `page.tsx`: Landing or redirect logic.
-  - `/sign-in`, `/sign-up`, `/dashboard`, `/api/auth`
-    - Each has its own `layout.tsx` and `page.tsx`.
-- **Common Components**: Put reusable UI pieces (buttons, inputs, cards) into a `/components` folder at the project root.
+### Organization
+- `/components/ui`: Base UI controls from `shadcn/ui` (Buttons, Inputs, Cards).
+- `/components/invitation`: Feature-specific components (InvitationEditor, ThemeSelector, AIAssistant, InvitationPreview).
+- `/components/layout`: Layout pieces (AppSidebar, DashboardHeader).
 
-**Reusability & Encapsulation**
-- Components are self-contained: each has its own styles (class names scoped to BEM) and behavior.
-- Shared logic (e.g., API calls) lives in `/lib` or `/hooks` so pages import only what they need.
-
-**Benefits**
-- **Easier Maintenance**: Fix a bug in one button component, and it updates everywhere.
-- **Better Team Collaboration**: Developers can own specific components or pages without stepping on each other’s code.
-
----
+### Reusability & Maintenance
+- Each component has a single responsibility (e.g., `ThemeSelector` only handles theme browsing).
+- Props-driven design allows easy customization (pass in theme tokens, event data).
+- Shared UI primitives minimize duplicate styling and behavior.
 
 ## 5. State Management
 
-**Current Approach**
-- **Local State**: React `useState` and `useEffect` for form values, loading flags, and error messages.
-- **Server State**: Fetch data (e.g., dashboard JSON) directly in page components or using React Server Components.
+### Approach
+- **React State & Context API**: Local component state for form inputs; global context for user session and theme settings.
+- **Server State**: Next.js `useRouter` with `fetch`/`axios` or `SWR` for data fetching and caching of invitations, themes, and user info.
 
-**Sharing State**
-- **React Context**: A simple auth context (`AuthContext`) holds the user’s session info, login/logout methods, and makes it available to any component.
-  - Located in `/context/AuthContext.tsx`.
-
-**Future Growth**
-- If complexity grows (deeply nested data, multiple user roles), consider:
-  - **Redux Toolkit** or **Zustand** for centralized state.
-  - Query libraries like **React Query** or **SWR** for caching and re-fetch logic.
-
----
+### Data Flow
+1. **Authentication Context**: Holds user info, login status, and JWT token.
+2. **Theme Context**: Tracks light/dark mode and selected invitation theme.
+3. **Invitation Editor State**: Local state in `InvitationEditor` for form fields; submit triggers API call to save data.
+4. **Shared Caching**: SWR caches API responses, ensuring smooth transitions between pages.
 
 ## 6. Routing and Navigation
 
-**Routing Library**
-- Built into **Next.js App Router**. Each folder under `/app` becomes a route automatically.
-- Layouts (`layout.tsx`) and pages (`page.tsx`) are colocated for that route.
+### Routing
+- Next.js App Router handles file-based routing under `/app`:
+  • `/app/dashboard/`: Protected dashboard pages.
+  • `/app/dashboard/create`: New invitation flow.
+  • `/app/dashboard/editor/[inviteId]`: Invitation editing with AI assistant.
+  • `/invites/[inviteId]`: Public invitation view (SSR).
+  • `/app/auth/...`: Sign-in, sign-up, password recovery.
 
-**Protected Pages**
-- The dashboard’s `layout.tsx` checks for a valid session (via cookie or context). If missing, it issues a server-side redirect to `/sign-in`.
-
-**Navigation Structure**
-- **Header**: Present in global layout with the app logo and conditional Sign In/Sign Out links.
-- **Sidebar**: Included in `dashboard/layout.tsx` with links to dashboard sections (expandable in future).
-
----
+### Navigation
+- **AppSidebar**: Links to Dashboard Home, My Invitations, Create New, Themes, Account Settings.
+- **Breadcrumbs**: Show user’s location (e.g., Dashboard > Create Invitation).
+- **Mobile Menu**: Collapsible sidebar for screens under 768px.
 
 ## 7. Performance Optimization
 
-1. **Code Splitting**: Next.js automatically breaks code by route. Users only load JS needed for the current page.
-2. **Lazy Loading**: For large components (charts, maps), wrap with `next/dynamic` to load them only when needed.
-3. **Image Optimization**: Use Next.js `<Image>` component to serve responsive, compressed images.
-4. **Caching**:
-   - Static assets (CSS, fonts) use long cache headers.
-   - API responses can be cached or ISR (Incremental Static Regeneration) applied.
-5. **Minification & Compression**: Next.js production builds automatically minify JS and CSS, and enable Brotli/Gzip on the CDN.
-
-These steps ensure fast page loads and smooth interactions.
-
----
+- **Code Splitting**: Next.js automatically splits code per route.
+- **Lazy Loading**: Dynamically import heavy components like `AIAssistant`.
+- **Image Optimization**: Next/Image for automatic resizing and modern formats.
+- **Asset Caching**: Leverage HTTP caching headers and service workers if needed.
+- **CSS Purging**: Tailwind’s purge strips unused styles in production.
 
 ## 8. Testing and Quality Assurance
 
-**Unit Tests**
-- **Jest** + **React Testing Library** for components and utility functions.
-- Example: test that the Sign In form shows an error message when fields are empty.
+### Strategies
+1. **Unit Tests**: Jest + React Testing Library for components (e.g., ensuring `ThemeSelector` lists all themes).
+2. **Integration Tests**: Test interactions between components and API routes using MSW (Mock Service Worker).
+3. **End-to-End Tests**: Playwright or Cypress to simulate user flows: sign up → create invitation → generate AI text → view public link.
 
-**Integration Tests**
-- Combine multiple components and hooks; test API calls with **msw** (Mock Service Worker).
+### Tools
+- **Jest**: Fast unit tests with snapshot capabilities.
+- **React Testing Library**: Encourages testing from the user’s perspective.
+- **MSW**: Mock API responses in tests.
+- **Cypress/Playwright**: Real browser testing for critical flows.
+- **ESLint & Prettier**: Enforce code style and catch errors early.
 
-**End-to-End (E2E) Tests**
-- **Cypress** or **Playwright** to simulate real user flows: signing up, logging in, and viewing the dashboard.
+## 9. Conclusion and Summary
 
-**Linting & Formatting**
-- **ESLint** enforces code style and catches common bugs.
-- **Prettier** applies consistent formatting.
-- **Git Hooks** (via Husky) run linting/tests before each commit.
+The frontend of the AI Invitation SaaS is built on a modern, type-safe, and scalable foundation using Next.js 15, TypeScript, Tailwind CSS, and `shadcn/ui`. It follows clear design principles—usability, accessibility, responsiveness—and employs a component-based architecture for maximum reusability. Theming is handled via CSS variables, enabling light/dark modes and custom invitation styles. State is managed locally with React and globally via Context and SWR. Routing is intuitive, balancing SSR for public invites with CSR for the dashboard. Performance is optimized through code splitting, lazy loading, and image optimization. Quality is ensured with unit, integration, and end-to-end tests.
 
-**Continuous Integration (CI)**
-- **GitHub Actions** runs tests and lint on each pull request, preventing regressions.
-
----
-
-## 9. Conclusion and Overall Frontend Summary
-
-The `codeguide-starter` frontend is built on modern, well-established tools—Next.js, React, and TypeScript—and follows clear principles around usability, accessibility, and maintainability. Its file-based structure, component-driven approach, and CSS-variable theming keep things organized and consistent.
-
-Key takeaways:
-- **Scalable Structure**: Add new features by creating new folders under `app/` without touching a central router.
-- **Component Reuse**: Shared UI pieces live in one place, making updates quick and error-free.
-- **Simple Styling**: Global and section-specific CSS, underpinned by CSS variables, ensures a unified look.
-- **Smooth Performance**: Next.js automatic optimizations plus best practices like lazy loading and caching.
-- **Quality Assurance**: A testing plan that covers unit, integration, and E2E scenarios, enforced by CI.
-
-With these guidelines, any developer coming into the project can understand how the pieces fit together, how to follow existing patterns, and how to keep the app fast, reliable, and easy to grow.
+By adhering to these guidelines, the team can maintain a consistent, high-quality frontend that aligns with user needs and scales as the SaaS grows.
