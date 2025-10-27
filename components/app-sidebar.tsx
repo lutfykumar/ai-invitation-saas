@@ -15,10 +15,13 @@ import {
   IconFolder,
   IconHelp,
   IconListDetails,
+  IconPlus,
   IconReport,
   IconSearch,
   IconSettings,
   IconUsers,
+  IconMail,
+  IconPalette,
 } from "@tabler/icons-react"
 
 import { NavDocuments } from "@/components/nav-documents"
@@ -39,28 +42,38 @@ const staticData = {
   navMain: [
     {
       title: "Dashboard",
-      url: "#",
+      url: "/dashboard",
       icon: IconDashboard,
     },
     {
-      title: "Lifecycle",
+      title: "Undangan Saya",
       url: "#",
-      icon: IconListDetails,
+      icon: IconMail,
+      items: [
+        {
+          title: "Semua Undangan",
+          url: "/dashboard/invitations",
+        },
+        {
+          title: "Buat Undangan",
+          url: "/dashboard/invitations/new",
+        },
+      ],
     },
     {
-      title: "Analytics",
+      title: "Tema & Kategori",
       url: "#",
-      icon: IconChartBar,
-    },
-    {
-      title: "Projects",
-      url: "#",
-      icon: IconFolder,
-    },
-    {
-      title: "Team",
-      url: "#",
-      icon: IconUsers,
+      icon: IconPalette,
+      items: [
+        {
+          title: "Kelola Tema",
+          url: "/dashboard/themes",
+        },
+        {
+          title: "Kelola Kategori",
+          url: "/dashboard/categories",
+        },
+      ],
     },
   ],
   navClouds: [
@@ -170,8 +183,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
               <Link href="/">
-                <Image src="/codeguide-logo.png" alt="CodeGuide" width={32} height={32} className="rounded-lg" />
-                <span className="text-base font-semibold font-parkinsans">CodeGuide</span>
+                <Image src="/codeguide-logo.png" alt="InvitationAI" width={32} height={32} className="rounded-lg" />
+                <span className="text-base font-semibold font-parkinsans">InvitationAI</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
